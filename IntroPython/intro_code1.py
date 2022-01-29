@@ -1,3 +1,6 @@
+#intro_code1.py 
+# input , print, format, type and dir funtions
+
 name = input("What's your name? \n")
 
 print ("Hello {}, nice to meet you!".format(name))
