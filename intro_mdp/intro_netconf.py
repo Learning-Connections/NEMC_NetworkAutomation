@@ -20,7 +20,7 @@ csr100v = {
 #Functions
 """no functions"""
 
-#Open a connection to IOS_XE_1 using the manager object. Note: To avoid indentation errors, you should copy one line at a time.
+#Open a connection using the manager object.
 
 m = manager.connect(
    host=csr100v["host"],

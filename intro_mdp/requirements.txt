@@ -1,3 +1,4 @@
 pyang==1.7.4
 lxml
 ncclient==0.6.4
+xmltodict==0.11.0
