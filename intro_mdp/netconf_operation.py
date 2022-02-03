@@ -115,8 +115,40 @@ def add_loopback():
    ) as m:
       #send the data to the device  
       netconf_reply = m.edit_config(netconf_data, target = 'running')
+      # Print out the raw XML that returned
+      print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
 
-#def remove_loopback():
+def remove_loopback():
+      # Create an XML configuration template for ietf-interfaces
+   netconf_interface_template = """
+   <config>
+       <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+           <interface operation="delete">
+           	<name>{name}</name>
+           </interface>
+       </interfaces>
+   </config>"""
+
+   # Ask for the Interface Details to Add
+   delete_loopback = {}
+   delete_loopback["name"] = "Loopback" + input("What loopback number to delete? ")
+
+   # Create the NETCONF data payload for this interface
+   netconf_data = netconf_interface_template.format(
+           name = delete_loopback["name"]
+       )
+   # Open a connection using the manager object. 
+   with manager.connect(
+       host=csr100v["host"],
+       port=csr100v["netconf_port"],
+       username=csr100v["username"],
+       password=csr100v["password"],
+       hostkey_verify=False
+   ) as m:
+      #send the data to the device  
+      netconf_reply = m.edit_config(netconf_data, target = 'running')
+      # Print out the raw XML that returned
+      print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
 
 #def save_config():
 
