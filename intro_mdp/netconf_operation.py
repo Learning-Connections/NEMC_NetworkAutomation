@@ -2,7 +2,7 @@
 # """Module docstring."""
 
 # Imports
-from ncclient import manager
+from ncclient import manager, xml_
 import xmltodict
 import xml.dom.minidom
 
@@ -145,12 +145,28 @@ def remove_loopback():
        password=csr100v["password"],
        hostkey_verify=False
    ) as m:
-      #send the data to the device  
+   #send the data to the device  
       netconf_reply = m.edit_config(netconf_data, target = 'running')
-      # Print out the raw XML that returned
+   # Print out the raw XML that returned
       print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
 
-#def save_config():
+def save_config():
+   # Create an XML body to execute the save operation
+   save_body = """
+   <cisco-ia:save-config xmlns:cisco-ia="http://cisco.com/yang/cisco-ia"/>
+   """   
+   # Open a connection to the network device using ncclient
+   with manager.connect(
+       host=csr100v["host"],
+       port=csr100v["netconf_port"],
+       username=csr100v["username"],
+       password=csr100v["password"],
+       hostkey_verify=False
+   ) as m:
+   # Use ncclient to send the RPC operation
+      netconf_reply = m.dispatch(xml_.to_ele(save_body))
+   # Print out the raw XML that returned
+      print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
 
 def menu():
    """Menu Funtion with conditional loop"""
@@ -168,10 +184,10 @@ def menu():
           get_interfaces()
       elif s=='2':
           add_loopback()
-      #elif s=='3':
-      #    remove_loopback()
-      #elif s=='4':
-      #   save_config()
+      elif s=='3':
+         remove_loopback()
+      elif s=='4':
+         save_config()
       elif s=='0':
           quit()
       else:
