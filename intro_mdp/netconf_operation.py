@@ -15,7 +15,11 @@ csr100v = {
     "netconf_port": 830,
     "ssh_port": 22
 }
-
+# IETF Interface Types
+IETF_INTERFACE_TYPES = {
+        "loopback": "ianaift:softwareLoopback",
+        "ethernet": "ianaift:ethernetCsmacd"
+    }
 # Global Variables
 """Global Variables Definitions"""
 
@@ -64,10 +68,57 @@ def get_interfaces():
             )
 
 def add_loopback():
+# Create an XML configuration template for ietf-interfaces
+   netconf_interface_template = """
+   <config>
+       <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+           <interface>
+               <name>{name}</name>
+               <description>{desc}</description>
+               <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">
+                   {type}
+               </type>
+               <enabled>{status}</enabled>
+               <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+                   <address>
+                       <ip>{ip_address}</ip>
+                       <netmask>{mask}</netmask>
+                   </address>
+               </ipv4>
+           </interface>
+       </interfaces>
+   </config>"""
+   # Ask for the Interface Details to Add
+   new_loopback = {}
+   new_loopback["name"] = "Loopback" + input("What loopback number to add? ")
+   new_loopback["desc"] = input("What description to use? ")
+   new_loopback["type"] = IETF_INTERFACE_TYPES["loopback"]
+   new_loopback["status"] = "true"
+   new_loopback["ip_address"] = input("What IP address? ")
+   new_loopback["mask"] = input("What network mask? ")
+   # Create the NETCONF data payload for this interface
+   netconf_data = netconf_interface_template.format(
+         name = new_loopback["name"],
+         desc = new_loopback["desc"],
+         type = new_loopback["type"],
+         status = new_loopback["status"],
+         ip_address = new_loopback["ip_address"],
+         mask = new_loopback["mask"]
+     )
+   # Open a connection using the manager object. 
+   with manager.connect(
+       host=csr100v["host"],
+       port=csr100v["netconf_port"],
+       username=csr100v["username"],
+       password=csr100v["password"],
+       hostkey_verify=False
+   ) as m:
+      #send the data to the device  
+      netconf_reply = m.edit_config(netconf_data, target = 'running')
 
-def remove_loopback():
+#def remove_loopback():
 
-def save_config():
+#def save_config():
 
 def menu():
    """Menu Funtion with conditional loop"""
@@ -85,16 +136,19 @@ def menu():
           get_interfaces()
       elif s=='2':
           add_loopback()
-      elif s=='3':
-          remove_loopback()
-      elif s=='4':
-         save_config()
+      #elif s=='3':
+      #    remove_loopback()
+      #elif s=='4':
+      #   save_config()
       elif s=='0':
           quit()
       else:
           print("Select a valid option...")
 
 
+def main():
+    menu()
 
-
-exit()
+#check if this is the main script and execute it
+if __name__ == '__main__':
+        main()
