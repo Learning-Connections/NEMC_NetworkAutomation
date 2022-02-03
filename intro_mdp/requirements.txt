@@ -1,2 +1,3 @@
 pyang==1.7.4
 lxml
+ncclient==0.6.4
