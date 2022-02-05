@@ -2,8 +2,6 @@
 # """Module docstring."""
 
 # Imports
-from math import fabs
-from textwrap import indent
 import requests
 import json
 
@@ -28,9 +26,7 @@ auth = requests.auth.HTTPBasicAuth(
 
 # Functions
 
-
 def get_interfaces():
-   # Create an XML filter for targeted NETCONF queries
     module = "ietf-interfaces:interfaces"
     url = "https://{}:{}/restconf/data/{}".format(
         csr1000v["host"], csr1000v["restconf_port"], module)
@@ -66,7 +62,6 @@ def add_loopback():
             }
         ]
     }
-    # response = requests.get(url, headers=headers, auth=requests.auth.HTTPBasicAuth(csr1000v["username"], csr1000v["password"]),verify=False)
     requests.packages.urllib3.disable_warnings()
     response = requests.post(url, headers=headers,
                              data=json.dumps(payload), auth=auth, verify=False)
@@ -107,6 +102,7 @@ def save_config():
     else:
         print("Issue with saving config")
 
+
 def menu():
     """Menu Funtion with conditional loop"""
     s = None
@@ -123,9 +119,9 @@ def menu():
             get_interfaces()
         elif s == '2':
             add_loopback()
-        elif s=='3':
+        elif s == '3':
             remove_loopback()
-        elif s=='4':
+        elif s == '4':
             save_config()
         elif s == '0':
             quit()
