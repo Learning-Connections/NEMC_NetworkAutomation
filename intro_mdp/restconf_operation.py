@@ -2,17 +2,27 @@
 # """Module docstring."""
 
 # Imports
+from math import fabs
+from textwrap import indent
 import requests
 import json
 
 # Constants
 # Define our lab instance of csr1000v
-csr100v = {
+csr1000v = {
     "host": "192.168.0.122",
     "username": "cisco",
     "password": "C1$c0123",
-    "restconf_port": 433,
+    "restconf_port": 443,
 }
+
+headers = {
+    "Accept": "application/yang-data+json",
+    "Content-Type": "application/yang-data+json",
+}
+
+auth = requests.auth.HTTPBasicAuth(
+    csr1000v["username"], csr1000v["password"])
 # Global Variables
 """Global Variables Definitions"""
 
@@ -21,93 +31,81 @@ csr100v = {
 
 def get_interfaces():
    # Create an XML filter for targeted NETCONF queries
-    url = "https://{}:{}/restconf/data/ietf-interfaces:interfaces".format(
-        csr100v["host"], csr100v["restconf_port"])
-    print(url)
+    module = "ietf-interfaces:interfaces"
+    url = "https://{}:{}/restconf/data/{}".format(
+        csr1000v["host"], csr1000v["restconf_port"], module)
+    requests.packages.urllib3.disable_warnings()
+    response = requests.get(url, headers=headers, auth=auth, verify=False)
+    print("The HTTP Response code is: {}\n".format(response.status_code))
+    print("The JSON Response is:")
+    print(response.json())
+    print("\n\n")
 
 
 def add_loopback():
-    # Create an XML configuration template for ietf-interfaces
-    netconf_interface_template = """
-   <config>
-       <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-           <interface>
-               <name>{name}</name>
-               <description>{desc}</description>
-               <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">
-                   {type}
-               </type>
-               <enabled>{status}</enabled>
-               <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
-                   <address>
-                       <ip>{ip_address}</ip>
-                       <netmask>{mask}</netmask>
-                   </address>
-               </ipv4>
-           </interface>
-       </interfaces>
-   </config>"""
-    # Ask for the Interface Details to Add
-    new_loopback = {}
-    new_loopback["name"] = "Loopback" + input("What loopback number to add? ")
-    new_loopback["desc"] = input("What description to use? ")
-    new_loopback["type"] = IETF_INTERFACE_TYPES["loopback"]
-    new_loopback["status"] = "true"
-    new_loopback["ip_address"] = input("What IP address? ")
-    new_loopback["mask"] = input("What network mask? ")
-    # Create the NETCONF data payload for this interface
-    netconf_data = netconf_interface_template.format(
-        name=new_loopback["name"],
-        desc=new_loopback["desc"],
-        type=new_loopback["type"],
-        status=new_loopback["status"],
-        ip_address=new_loopback["ip_address"],
-        mask=new_loopback["mask"]
-    )
-    # Open a connection using the manager object.
-    with manager.connect(
-        host=csr100v["host"],
-        port=csr100v["netconf_port"],
-        username=csr100v["username"],
-        password=csr100v["password"],
-        hostkey_verify=False
-    ) as m:
-        # send the data to the device
-        netconf_reply = m.edit_config(netconf_data, target='running')
-        # Print out the raw XML that returned
-        print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
+    module = "ietf-interfaces:interfaces"
+    url = "https://{}:{}/restconf/data/{}".format(
+        csr1000v["host"], csr1000v["restconf_port"], module)
+    auth = requests.auth.HTTPBasicAuth(
+        csr1000v["username"], csr1000v["password"])
+    payload = {
+        "interface": [
+            {
+                "name": "Loopback100",
+                "description": "Added with RESTCONF",
+                "type": "iana-if-type:softwareLoopback",
+                "enabled": "true",
+                "ietf-ip:ipv4": {
+                    "address": [
+                        {
+                            "ip": "172.16.100.1",
+                            "netmask": "255.255.255.0"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    # response = requests.get(url, headers=headers, auth=requests.auth.HTTPBasicAuth(csr1000v["username"], csr1000v["password"]),verify=False)
+    requests.packages.urllib3.disable_warnings()
+    response = requests.post(url, headers=headers,
+                             data=json.dumps(payload), auth=auth, verify=False)
+
+    if (response.status_code == 201):
+        print("Successfully added interface")
+    else:
+        print("Issue with adding interface")
 
 
 def remove_loopback():
-     # Create an XML configuration template for ietf-interfaces
-    netconf_interface_template = """
-   <config>
-       <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-           <interface operation="delete">
-           	<name>{name}</name>
-           </interface>
-       </interfaces>
-   </config>"""
+    module = "ietf-interfaces:interfaces/interface=Loopback100"
+    url = "https://{}:{}/restconf/data/{}".format(
+        csr1000v["host"], csr1000v["restconf_port"], module)
+    auth = requests.auth.HTTPBasicAuth(
+        csr1000v["username"], csr1000v["password"])
 
-    # Ask for the Interface Details to Add
-    delete_loopback = {}
-    delete_loopback["name"] = "Loopback" + \
-        input("What loopback number to delete? ")
+    requests.packages.urllib3.disable_warnings()
+    response = requests.delete(url, headers=headers, auth=auth, verify=False)
 
-    # Create the NETCONF data payload for this interface
-    netconf_data = netconf_interface_template.format(
-        name=delete_loopback["name"]
-    )
-    
+    if (response.status_code == 204):
+        print("Successfully deleted interface")
+    else:
+        print("Issue with deleting interface")
 
 
 def save_config():
-    # Create an XML body to execute the save operation
-    save_body = """
-   <cisco-ia:save-config xmlns:cisco-ia="http://cisco.com/yang/cisco-ia"/>
-   """
-    
-
+    module = 'cisco-ia:save-config'
+    url = "https://{}:{}/restconf/data/{}".format(
+        csr1000v["host"], csr1000v["restconf_port"], module)
+    auth = requests.auth.HTTPBasicAuth(
+        csr1000v["username"], csr1000v["password"])
+    requests.packages.urllib3.disable_warnings()
+    response = requests.post(url, headers=headers, auth=auth, verify=False)
+    print(response)
+    if (response.status_code == 200):
+        print("Successfully saved config")
+    else:
+        print("Issue with saving config")
 
 def menu():
     """Menu Funtion with conditional loop"""
@@ -123,16 +121,16 @@ def menu():
         s = input('Type your choice: ')
         if s == '1':
             get_interfaces()
-        # elif s=='2':
-        #  add_loopback()
-        # elif s=='3':
-        #  remove_loopback()
-        # elif s=='4':
-        #  save_config()
+        elif s == '2':
+            add_loopback()
+        elif s=='3':
+            remove_loopback()
+        elif s=='4':
+            save_config()
         elif s == '0':
-             quit()
+            quit()
         else:
-             print("Select a valid option...")
+            print("Select a valid option...")
 
 
 def main():

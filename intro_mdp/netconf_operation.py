@@ -8,7 +8,7 @@ import xml.dom.minidom
 
 # Constants
 # Define our lab instance of csr1000v
-csr100v = {
+csr1000v = {
     "host": "192.168.0.122",
     "username": "cisco",
     "password": "C1$c0123",
@@ -35,10 +35,10 @@ def get_interfaces():
 
    # Open a connection using the manager object. 
    with manager.connect(
-       host=csr100v["host"],
-       port=csr100v["netconf_port"],
-       username=csr100v["username"],
-       password=csr100v["password"],
+       host=csr1000v["host"],
+       port=csr1000v["netconf_port"],
+       username=csr1000v["username"],
+       password=csr1000v["password"],
        hostkey_verify=False
    ) as m:
 
@@ -107,10 +107,10 @@ def add_loopback():
      )
    # Open a connection using the manager object. 
    with manager.connect(
-       host=csr100v["host"],
-       port=csr100v["netconf_port"],
-       username=csr100v["username"],
-       password=csr100v["password"],
+       host=csr1000v["host"],
+       port=csr1000v["netconf_port"],
+       username=csr1000v["username"],
+       password=csr1000v["password"],
        hostkey_verify=False
    ) as m:
       #send the data to the device  
@@ -129,7 +129,7 @@ def remove_loopback():
        </interfaces>
    </config>"""
 
-   # Ask for the Interface Details to Add
+   # Ask for the Interface Details to Remove
    delete_loopback = {}
    delete_loopback["name"] = "Loopback" + input("What loopback number to delete? ")
 
@@ -139,10 +139,10 @@ def remove_loopback():
        )
    # Open a connection using the manager object. 
    with manager.connect(
-       host=csr100v["host"],
-       port=csr100v["netconf_port"],
-       username=csr100v["username"],
-       password=csr100v["password"],
+       host=csr1000v["host"],
+       port=csr1000v["netconf_port"],
+       username=csr1000v["username"],
+       password=csr1000v["password"],
        hostkey_verify=False
    ) as m:
    #send the data to the device  
@@ -157,10 +157,10 @@ def save_config():
    """   
    # Open a connection to the network device using ncclient
    with manager.connect(
-       host=csr100v["host"],
-       port=csr100v["netconf_port"],
-       username=csr100v["username"],
-       password=csr100v["password"],
+       host=csr1000v["host"],
+       port=csr1000v["netconf_port"],
+       username=csr1000v["username"],
+       password=csr1000v["password"],
        hostkey_verify=False
    ) as m:
    # Use ncclient to send the RPC operation
