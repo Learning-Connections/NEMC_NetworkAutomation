@@ -2,4 +2,4 @@
 /venv
 *.txt
 !requirements.txt
-IntroPython/parsingJSON_hands-on.py
+parsingJSON_hands-on.py
