@@ -5,7 +5,7 @@
 def check_age(age):
     if age < 14:
         return "You cannot drive yet, keep walking! :)"
-    elif age >14 and age <18:
+    elif age > 14 and age < 18:
         return "You can drive a scooter!"
     else:
         return "You can drive a car now!"
