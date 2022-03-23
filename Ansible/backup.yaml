@@ -1,0 +1,30 @@
+---
+- name: Backup Lab Non-ACI NX-OS devices
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+      
+    - name: Get Timestamp
+      run_once: true
+      command: date +%Y-%m-%d
+      delegate_to: localhost
+      register: timestamp
+
+    - name: Creating folders based on the date
+      file:
+        path: "./{{timestamp.stdout}}/"
+        state: directory
+    
+    - name: Get the running-config for IOS devices
+      ios_command:
+        commands:
+          - term len 0
+          - show running-config | exclude ^ntp.clock-period|Last.configuration.change|NVRAM.config.last.updated|Current.configuration.*bytes
+      register: cli_results
+    
+    - name: Save the running config to ansible server
+      copy:
+        content: "{{ cli_results.stdout[1] }}"
+        dest: "./{{timestamp.stdout}}/{{ inventory_hostname }}.cfg"

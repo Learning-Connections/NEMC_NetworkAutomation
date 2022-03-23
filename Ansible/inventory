@@ -1,0 +1,2 @@
+[router]
+csr1000v ansible_host=192.168.0.123 ansible_network_os=ios ansible_user=cisco ansible_password=C1$c0123 
