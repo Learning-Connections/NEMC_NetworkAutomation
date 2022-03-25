@@ -1,4 +1,4 @@
-- name: gather interfaces resource # this is the Playbook
+- name: Configure Router # this is the Playbook
   hosts: all	# host definition baed on invntory. Against which host or group the playbook will run
   gather_facts: false # Facts Gathering. Fon Network is usually set to False because there are specific modules for it
   connection: local      # Type of Ansible Connection: local, network_cli, netconf, httpapi
