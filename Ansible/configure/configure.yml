@@ -1,0 +1,22 @@
+- name: Configure routers # this is the Playbook
+  hosts: all	# host definition baed on invntory. Against which host or group the playbook will run
+  gather_facts: false # Facts Gathering. Fon Network is usually set to False because there are specific modules for it
+  connection: local      # Type of Ansible Connection: local, network_cli, netconf, httpapi
+
+  vars_files:         # include external variable files
+    - credentials.yml
+  vars:            # define playbook variables
+    cli:           # dict that define the variables used by the provider of the connection: 
+      username: '{{username}}'
+      password: '{{password}}'
+      host: '{{ansible_host}}'
+      auth_pass: '{{password}}'
+      authorize: yes
+  
+  roles:                  #lists of roles called from this playbook
+  #using roles we can simplify the playbook and reuse code
+  #tags allow us to call only specific piece of our playbook
+  - role: conf_hostname   
+    tags: conf_hostname   
+  - role: conf_interfaces
+    tags: conf_interfaces

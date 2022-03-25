@@ -1,0 +1,8 @@
+---
+# tasks file for conf_interfaces
+- name: configure interfaces
+  cisco.ios.ios_config:
+     src: interfaces.j2
+  with_items:
+     - {if_name: "Loopback0", if_descr: "Loopback Configured with Ansible", if_ip: "1.1.1.1", if_mask: "255.255.255.255"}      
+     - {if_name: "Loopback1", if_descr: "Loopback Configured with Ansible", if_ip: "1.1.1.2", if_mask: "255.255.255.255"}  

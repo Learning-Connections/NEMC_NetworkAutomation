@@ -1,0 +1,26 @@
+- name: gather interfaces resource # this is the Playbook
+  hosts: all	# host definition baed on invntory. Against which host or group the playbook will run
+  gather_facts: false # Facts Gathering. Fon Network is usually set to False because there are specific modules for it
+  connection: local      # Type of Ansible Connection: local, network_cli, netconf, httpapi
+
+  vars_files:         # include external variable files
+    - credentials.yml
+  vars:            # define playbook variables
+    cli:           # dict that define the variables used by the provider of the connection: 
+      username: '{{username}}'
+      password: '{{password}}'
+      host: '{{ansible_host}}'
+      auth_pass: '{{password}}'
+      authorize: yes
+  tasks:                    # Task list. Always run from Top to Bottom
+   
+   - name: configure hostname
+     cisco.ios.ios_config:
+       lines: hostname {{ inventory_hostname }}
+   
+   - name: configure interfaces
+     cisco.ios.ios_config:
+        src: interfaces.j2
+     with_items:
+        - {if_name: "Loopback0", if_descr: "Loopback Configured with Ansible", if_ip: "1.1.1.1", if_mask: "255.255.255.255"}      
+        - {if_name: "Loopback1", if_descr: "Loopback Configured with Ansible", if_ip: "1.1.1.2", if_mask: "255.255.255.255"}  

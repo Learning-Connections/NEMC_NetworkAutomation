@@ -1,0 +1,5 @@
+---
+# tasks file for conf_hostname
+- name: configure hostname
+  cisco.ios.ios_config:
+    lines: hostname {{ inventory_hostname }}
