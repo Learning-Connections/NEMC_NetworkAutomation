@@ -8,13 +8,13 @@
       
     - name: Get Timestamp
       run_once: true
-      command: date +%Y-%m-%d
+      command: date +%Y-%m-%d-%H%M%S
       delegate_to: localhost
       register: timestamp
 
-    - name: Creating folders based on the date
+    - name: Creating folders based on the hostname
       file:
-        path: "./{{timestamp.stdout}}/"
+        path: "./configs/{{inventory_hostname}}/"
         state: directory
     
     - name: Get the running-config for IOS devices
@@ -27,4 +27,4 @@
     - name: Save the running config to ansible server
       copy:
         content: "{{ cli_results.stdout[1] }}"
-        dest: "./{{timestamp.stdout}}/{{ inventory_hostname }}.cfg"
+        dest: "./configs/{{inventory_hostname}}/{{ inventory_hostname }}_{{timestamp.stdout}}.cfg"
